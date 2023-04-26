@@ -21,7 +21,27 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+
+    # create beautiful soup object
+    soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+    links = []
+
+    # find all <a> tags to extract links
+    for link in soup.findAll('a', href='True'):
+        href = link.get('href')
+
+
+dafasf
+        # parse for url (href value)
+        parsed = urlparse(href)
+
+        # if in http or https add to links list
+        if parsed.scheme in set(['http', 'https']):
+            links.append(href)
+
+    return links
+
+    # return list()
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
