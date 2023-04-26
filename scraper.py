@@ -6,10 +6,10 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -30,26 +30,22 @@ def extract_next_links(url, resp):
     for link in soup.findAll('a', href='True'):
         href = link.get('href')
 
-        # parse for url (href value)
-        parsed = urlparse(href)
-
-        # if in http or https add to links list
-        if parsed.scheme in set(['http', 'https']):
+        # check if link is valid
+        if is_valid(href):
             links.append(href)
 
     return links
 
-    # return list()
 
 def is_valid(url):
-    # Decide whether to crawl this url or not. 
+    # Decide whether to crawl this url or not.
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        if parsed.hostname not in set(["ics.uci.edu", "cs.uci.edu","informatics.uci.edu","stat.uci.edu"]):
+        if parsed.hostname not in set(["ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu"]):
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -62,5 +58,5 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
     except TypeError:
-        print ("TypeError for ", parsed)
+        print("TypeError for ", parsed)
         raise
