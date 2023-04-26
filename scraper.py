@@ -30,8 +30,6 @@ def extract_next_links(url, resp):
     for link in soup.findAll('a', href='True'):
         href = link.get('href')
 
-
-dafasf
         # parse for url (href value)
         parsed = urlparse(href)
 
