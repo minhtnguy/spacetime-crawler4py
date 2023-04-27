@@ -30,6 +30,9 @@ def extract_next_links(url, resp):
     for link in soup.findAll('a', href='True'):
         href = link.get('href')
 
+        # defragment the URLs (not sure if it goes here or in is_valid)
+        href = href.split('#')[0]
+
         # check if link is valid
         if is_valid(href):
             links.append(href)
