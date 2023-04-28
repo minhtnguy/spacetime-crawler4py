@@ -3,7 +3,11 @@ import pickle
 from urllib.parse import urlparse
 
 from collections import Counter
+<<<<<<< HEAD
 # from bs4 import BeautifulSoup
+=======
+from bs4 import BeautifulSoup
+>>>>>>> ea2e8c43e76486ff9ac6bc5fcc21f0b6fce64f93
 from nltk.corpus import stopwords
 
 
