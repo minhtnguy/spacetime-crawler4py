@@ -23,22 +23,39 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
+    try:
+        getAll = resp.raw_response.content.decode("utf-8")
+
+        # Gets all links within domain then defragments
+        urls = re.findall(r'href=["\']?([^"\'>]+)', getAll) 
+
+        domain_links = []
+        for url in urls:
+            parsed_url = urlparse(url)
+            if parsed_url.scheme and parsed_url.netloc:  # Check if the URL has domain
+                domain_links.append(parsed_url.geturl())  # Appends valid URL to list
+
+        return domain_links
+
+    except Exception as ex:
+        print("Error in extract_next_links")
+        return
     # create beautiful soup object
-    soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
-    links = []
+    # soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+    # links = []
 
-    # find all <a> tags to extract links
-    for link in soup.findAll('a', href='True'):
-        href = link.get('href')
+    # # find all <a> tags to extract links
+    # for link in soup.findAll('a', href='True'):
+    #     href = link.get('href')
 
-        # defragment the URLs (not sure if it goes here or in is_valid)
-        href = href.split('#')[0]
+    #     # defragment the URLs (not sure if it goes here or in is_valid)
+    #     href = href.split('#')[0]
 
-        # check if link is valid
-        if is_valid(href):
-            links.append(href)
+    #     # check if link is valid
+    #     if is_valid(href):
+    #         links.append(href)
 
-    return links
+    # return links
 
 
 def is_valid(url):
