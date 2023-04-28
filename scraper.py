@@ -2,7 +2,6 @@ import re
 from urllib.parse import urlparse
 
 from collections import Counter
-import requests
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 
