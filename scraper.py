@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from collections import Counter
 import requests
 from bs4 import BeautifulSoup
+from nltk.corpus import stopwords
 
 
 def scraper(url, resp):
@@ -64,10 +65,11 @@ def is_valid(url):
         print("TypeError for ", parsed)
         raise
 
+
 # counts the number of words on a page, uses tokenizer logic (still need to figure out parameter)
 def word_count(page):
     numWords = 0
-    for word in re.split('[^a-zA-Z0-9]',page):
+    for word in re.split('[^a-zA-Z0-9]', page):
         word = word.lower()
         alpha_word = ""
         for letter in word:
@@ -80,3 +82,16 @@ def word_count(page):
         numWords += 1
     return numWords
 
+
+# finds the 50 most common words by extracting text and adding to word_count
+def common_words(pages):
+    stopwords = set(stopwords.words('english'))
+    word_count = Counter()
+
+    for page in pages:
+        soup = BeautifulSoup(page, 'html.parser')
+        text = soup.get_text()
+        words = re.findall(r'\b\w+\b', text.lower())
+        word_count.update(word for word in words if word not in stopwords)
+
+    return [word for word, count in word_count.most_common(50)]
