@@ -63,3 +63,20 @@ def is_valid(url):
     except TypeError:
         print("TypeError for ", parsed)
         raise
+
+# counts the number of words on a page, uses tokenizer logic (still need to figure out parameter)
+def word_count(page):
+    numWords = 0
+    for word in re.split('[^a-zA-Z0-9]',page):
+        word = word.lower()
+        alpha_word = ""
+        for letter in word:
+            # if in alphabet
+            if ord(letter) >= 97 and ord(letter) <= 122:
+                alpha_word += letter
+                # if a number
+            if ord(letter) >= 48 and ord(letter) <= 57:
+                alpha_word += letter
+        numWords += 1
+    return numWords
+
