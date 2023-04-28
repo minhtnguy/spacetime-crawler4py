@@ -113,3 +113,15 @@ def common_words(pages):
         word_count.update(word for word in words if word not in stopwords)
 
     return [word for word, count in word_count.most_common(50)]
+
+# find all unique urls
+def unique_urls(url):
+    #for each url, find the first like url part, and if its unique add it to count.
+    list = []
+    parsed = urlparse(url)
+    checkurl = parsed.hostname
+
+    if checkurl not in list:
+        list.append(checkurl)
+
+    return len(list)
