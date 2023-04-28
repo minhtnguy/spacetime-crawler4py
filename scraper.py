@@ -83,7 +83,7 @@ def word_count(page):
     return numWords
 
 
-# finds the 50 most common words by extracting text and adding to word_count
+# finds the 50 most common words
 def common_words(pages):
     stopwords = set(stopwords.words('english'))
     word_count = Counter()
@@ -92,6 +92,7 @@ def common_words(pages):
         soup = BeautifulSoup(page, 'html.parser')
         text = soup.get_text()
         words = re.findall(r'\b\w+\b', text.lower())
+        # if word is is not in stopwords list, add to word_count
         word_count.update(word for word in words if word not in stopwords)
 
     return [word for word, count in word_count.most_common(50)]
