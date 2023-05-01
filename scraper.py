@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from collections import Counter
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
+from simhash import Simhash
 
 
 def scraper(url, resp):
@@ -22,19 +23,24 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+    global visited_links
     
     links = []
     if resp.status == 200:
         content = resp.raw_response.content
+        # if page is empty return empty list (no links to extract)
         if not content:
             return links
         
-        if content:
-            global soup
-            soup = BeautifulSoup(content, 'html.parser')
-            
-            for link in soup.find_all('a'):
-                links.append(link.get('href'))    
+        global soup
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        for link in soup.find_all('a'):
+            link = link.get('href')
+            # check if link is valid and has not been visted yet
+            if link and is_valid(link) and link not in visited_links:
+                links.append(link)
+                visited_links.add(link) 
                 
     return links
 
@@ -48,6 +54,9 @@ def is_valid(url):
         if parsed.scheme not in set(["http", "https"]):
             return False
         if not any(parsed.netloc.endswith(domain) for domain in [".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu", ".stat.uci.edu"]):
+            return False
+        # if url contains unwanted paths (pages with no info)
+        if re.search(r".*(/calendar|/mailto:http|/files/|/publications/|/papers/)", parsed.path.lower()):
             return False
 
         return not re.match(
