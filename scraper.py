@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from simhash import Simhash, SimhashIndex
 
+visited_links = set()
 simhash_index = SimhashIndex([], k=3)
 
 
@@ -36,7 +37,6 @@ def extract_next_links(url, resp):
         if not content:
             return links
         
-        global soup
         soup = BeautifulSoup(content, 'html.parser')
         # remove html tags and extracts text
         page_text = soup.get_text()
@@ -97,7 +97,7 @@ def is_valid(url):
         raise
 
 # finds longest page based on number of words
-def longest_page(pages):
+def longest_page():
     numWords = 0
     
     # parse through pages
@@ -116,12 +116,12 @@ def longest_page(pages):
 
 
 # finds the 50 most common words
-def common_words(pages):
+def common_words():
     stopwords = set(stopwords.words('english'))
     word_count = Counter()
 
-    for page in pages:
-        soup = BeautifulSoup(page, 'html.parser')
+    for link in visited_links:
+        soup = BeautifulSoup(link, 'html.parser')
         text = soup.get_text()
         words = re.findall(r'\b\w+\b', text.lower())
         # if word is is not in stopwords list, add to word_count
@@ -130,7 +130,7 @@ def common_words(pages):
     return [word for word, count in word_count.most_common(50)]
 
 # find all unique urls
-def unique_urls(url):
+def unique_urls():
     #for each url, find the first like url part, and if its unique add it to count.
     list = []
     parsed = urlparse(url)
@@ -141,6 +141,7 @@ def unique_urls(url):
 
     return len(list)
 
+# finds subdomains in ics.uci.edu domain
 def count_subdomains():
     subdomains = {}
     for link in visited_links:
@@ -151,7 +152,7 @@ def count_subdomains():
         if parsed_url.netloc.endswith('.ics.uci.edu'):
             # extract first part of domain
             subdomain = domain_parts[-4]
-        # add to dictionary
+        # add to set
         if subdomain not in subdomains:
             subdomains[subdomain] = set()
         
