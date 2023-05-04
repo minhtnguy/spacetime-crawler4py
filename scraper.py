@@ -2,6 +2,7 @@ import re
 import pickle
 from urllib.parse import urlparse
 from urllib.parse import urljoin
+from urllib.parse import parse_qs
 
 from collections import Counter
 from bs4 import BeautifulSoup
@@ -61,7 +62,16 @@ def is_valid(url):
         # if url contains unwanted paths (pages with no info)
         if re.search(r".*(/calendar|/mailto:http|/files/|/publications/|/papers/)", parsed.path.lower()):
             return False
-
+        # checks if first 9 characters of url path matches /wp-json/
+        if re.match(r"/wp-json/", parsed.path.lower()[0:9]):
+            return False
+        
+        # will parse for action parameter, if paramteter is action to download is found, rejects URL
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query)
+        if "action" in params and "download" in params["action"]:
+            return False
+        
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
