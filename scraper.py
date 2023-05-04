@@ -96,21 +96,22 @@ def is_valid(url):
         print("TypeError for ", parsed)
         raise
 
-
-# counts the number of words on a page, uses tokenizer logic (still need to figure out parameter)
-def word_count(page):
+# finds longest page based on number of words
+def longest_page(pages):
     numWords = 0
-    for word in re.split('[^a-zA-Z0-9]', page):
-        word = word.lower()
-        alpha_word = ""
-        for letter in word:
-            # if in alphabet
-            if ord(letter) >= 97 and ord(letter) <= 122:
-                alpha_word += letter
-                # if a number
-            if ord(letter) >= 48 and ord(letter) <= 57:
-                alpha_word += letter
-        numWords += 1
+    
+    # parse through pages
+    for page in pages:
+        soup = BeautifulSoup(page, 'html.parser')
+        text = soup.get_text()
+        pageCount = 0
+        # count how many words on page
+        for word in re.split('[^a-zA-Z0-9]', text):
+            word = word.lower()
+            pageCount += 1
+        if pageCount > numWords:
+            numWords = pageCount
+    
     return numWords
 
 
