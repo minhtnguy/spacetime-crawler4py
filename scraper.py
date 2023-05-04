@@ -3,6 +3,7 @@ import pickle
 from urllib.parse import urlparse
 from urllib.parse import urljoin
 from urllib.parse import parse_qs
+from urllib.parse import urldefrag
 
 from collections import Counter
 from bs4 import BeautifulSoup
@@ -99,10 +100,11 @@ def is_valid(url):
 # finds longest page based on number of words
 def longest_page():
     numWords = 0
+    longestPage = None
     
     # parse through pages
-    for page in pages:
-        soup = BeautifulSoup(page, 'html.parser')
+    for link in visited_links:
+        soup = BeautifulSoup(link, 'html.parser')
         text = soup.get_text()
         pageCount = 0
         # count how many words on page
@@ -111,8 +113,9 @@ def longest_page():
             pageCount += 1
         if pageCount > numWords:
             numWords = pageCount
+            longestPage = link
     
-    return numWords
+    return longestPage
 
 
 # finds the 50 most common words
@@ -131,15 +134,15 @@ def common_words():
 
 # find all unique urls
 def unique_urls():
-    #for each url, find the first like url part, and if its unique add it to count.
-    list = []
-    parsed = urlparse(url)
-    checkurl = parsed.hostname
+    # for each url, find the first like url part, and if its unique add it to count.
+    unique_urls = set()
+    for link in visited_links:
+        parsed = urlparse(link)
+        # remove fragment
+        url_without_fragment = urldefrag(link).link
+        unique_urls.add(url_without_fragment)
 
-    if checkurl not in list:
-        list.append(checkurl)
-
-    return len(list)
+    return len(unique_urls)
 
 # finds subdomains in ics.uci.edu domain
 def count_subdomains():
@@ -164,4 +167,22 @@ def count_subdomains():
             pages_count = len(links)
             subdomain_count.append(('http://{}.ics.uci.edu'.format(subdomain), pages_count))
             
-        return sorted(subdomain_count)
+    return sorted(subdomain_count)
+    
+    
+def main():
+    unique_urls = unique_urls()
+    print("Unique pages: ",unique_urls)
+    
+    longest_page = longest_page()
+    print("Longest page: ",longest_page)
+    
+    common_words = common_words()
+    print("50 most common words: ",common_words)
+    
+    subdomains = count_subdomains()
+    print("Subdomains found: ",subdomains)
+    
+    
+if __name__ == '__main__':
+    main()
