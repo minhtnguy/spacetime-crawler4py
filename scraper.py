@@ -7,7 +7,9 @@ from urllib.parse import parse_qs
 from collections import Counter
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
-from simhash import Simhash
+from simhash import Simhash, SimhashIndex
+
+simhash_index = SimhashIndex([], k=3)
 
 
 def scraper(url, resp):
@@ -25,7 +27,7 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    global visited_links
+    global visited_links, simhash_index
     
     links = []
     if resp.status == 200:
@@ -36,6 +38,14 @@ def extract_next_links(url, resp):
         
         global soup
         soup = BeautifulSoup(content, 'html.parser')
+        # remove html tags and extracts text
+        page_text = soup.get_text()
+        
+        simhash = Simhash(page_text)
+        # check if page is similar to previously visited pages
+        if simhash_index.get_near_dups(simhash):
+            return links
+        simhash_index.add(url, simhash)
         
         for link in soup.find_all('a'):
             link = link.get('href')
