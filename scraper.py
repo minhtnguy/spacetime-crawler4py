@@ -139,3 +139,27 @@ def unique_urls(url):
         list.append(checkurl)
 
     return len(list)
+
+def count_subdomains():
+    subdomains = {}
+    for link in visited_links:
+        parsed_url = urlparse(link)
+        # split domain into different parts
+        domain_parts = parsed_url.netloc.split('.')
+        # check if domain is in ics.uci.edu
+        if parsed_url.netloc.endswith('.ics.uci.edu'):
+            # extract first part of domain
+            subdomain = domain_parts[-4]
+        # add to dictionary
+        if subdomain not in subdomains:
+            subdomains[subdomain] = set()
+        
+        subdomains[subdomain].add(link)
+        subdomain_count = []
+        
+        # loop through each subdomain and count how many there are
+        for subdomain, links in subdomain.items():
+            pages_count = len(links)
+            subdomain_count.append(('http://{}.ics.uci.edu'.format(subdomain), pages_count))
+            
+        return sorted(subdomain_count)
