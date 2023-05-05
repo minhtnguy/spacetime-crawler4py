@@ -32,7 +32,7 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    global visited_links, simhash_index
+    global visited_links, simhash_index, longest_page_link
     
     links = []
     if resp.status == 200:
@@ -59,6 +59,9 @@ def extract_next_links(url, resp):
                 if urljoin(url, link) != resp.url:
                     print("Detected redirect from {} to {}".format(urljoin(url,link),resp.url))
                 visited_links.add(link) 
+
+    # calls longest_page and assigns longest page link to the global variable
+    longest_page_link = longest_page()
                 
     return links
 
