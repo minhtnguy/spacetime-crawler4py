@@ -1,5 +1,7 @@
 import re
 import pickle
+import nltk
+
 from urllib.parse import urlparse
 from urllib.parse import urljoin
 from urllib.parse import parse_qs
@@ -120,7 +122,7 @@ def longest_page():
 
 # finds the 50 most common words
 def common_words():
-    stopwords = set(stopwords.words('english'))
+    stopwords_list = set(stopwords.words('english'))
     word_count = Counter()
 
     for link in visited_links:
@@ -128,7 +130,7 @@ def common_words():
         text = soup.get_text()
         words = re.findall(r'\b\w+\b', text.lower())
         # if word is is not in stopwords list, add to word_count
-        word_count.update(word for word in words if word not in stopwords)
+        word_count.update(word for word in words if word not in stopwords_list)
         
     return [word for word, count in word_count.most_common(50)]
 
@@ -147,6 +149,7 @@ def unique_urls():
 # finds subdomains in ics.uci.edu domain
 def count_subdomains():
     subdomains = {}
+    subdomain_count = []
     for link in visited_links:
         parsed_url = urlparse(link)
         # split domain into different parts
@@ -160,7 +163,6 @@ def count_subdomains():
             subdomains[subdomain] = set()
         
         subdomains[subdomain].add(link)
-        subdomain_count = []
         
         # loop through each subdomain and count how many there are
         for subdomain, links in subdomain.items():
@@ -171,17 +173,17 @@ def count_subdomains():
     
     
 def main():
-    unique_urls = unique_urls()
-    print("Unique pages: ",unique_urls)
+    get_unique_urls = unique_urls()
+    print("Unique pages: ", get_unique_urls)
     
-    longest_page = longest_page()
-    print("Longest page: ",longest_page)
+    get_longest_page = longest_page()
+    print("Longest page: ", get_longest_page)
     
-    common_words = common_words()
-    print("50 most common words: ",common_words)
+    get_common_words = common_words()
+    print("50 most common words: ", get_common_words)
     
-    subdomains = count_subdomains()
-    print("Subdomains found: ",subdomains)
+    get_subdomains = count_subdomains()
+    print("Subdomains found: ", get_subdomains)
     
     
 if __name__ == '__main__':
