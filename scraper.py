@@ -1,7 +1,7 @@
 import re
 import pickle
 import nltk
-# nltk.download('stopwords')
+nltk.download('stopwords')
 
 from urllib.parse import urlparse
 from urllib.parse import urljoin
@@ -32,7 +32,7 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    global visited_links, simhash_index, longest_page_link
+    global visited_links, simhash_index
     
     links = []
     if resp.status == 200:
@@ -43,7 +43,8 @@ def extract_next_links(url, resp):
         
         soup = BeautifulSoup(content, 'html.parser')
         # remove html tags and extracts text
-        page_text = soup.get_text()
+        page_text = soup.get_text()  
+        
         
         simhash = Simhash(page_text)
         # check if page is similar to previously visited pages
@@ -60,9 +61,6 @@ def extract_next_links(url, resp):
                     print("Detected redirect from {} to {}".format(urljoin(url,link),resp.url))
                 visited_links.add(link) 
 
-    # calls longest_page and assigns longest page link to the global variable
-    longest_page_link = longest_page()
-                
     return links
 
 
