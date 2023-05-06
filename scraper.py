@@ -13,13 +13,13 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from simhash import Simhash, SimhashIndex
 
-visited_links = set()
+all_links = set()
 simhash_index = SimhashIndex([], k=3)
 
 
 def scraper(url, resp):
-    links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    new_links = extract_next_links(url, resp)
+    return [link for link in new_links if is_valid(link)]
 
 
 def extract_next_links(url, resp):
@@ -32,14 +32,14 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    global visited_links, simhash_index
-    
-    links = []
+    global all_links, simhash_index
+
+    new_links = []
     if resp.status == 200:
         content = resp.raw_response.content
         # if page is empty return empty list (no links to extract)
         if not content:
-            return links
+            return []
         
         soup = BeautifulSoup(content, 'html.parser')
         # remove html tags and extracts text
@@ -49,19 +49,19 @@ def extract_next_links(url, resp):
         simhash = Simhash(page_text)
         # check if page is similar to previously visited pages
         if simhash_index.get_near_dups(simhash):
-            return links
+            return []
         simhash_index.add(url, simhash)
         
         for link in soup.find_all('a'):
             link = link.get('href')
             # check if link is valid and has not been visted yet
-            if link and is_valid(link) and link not in visited_links:
-                links.append(link)
+            if link and is_valid(link) and link not in all_links:
+                new_links.append(link)
                 if urljoin(url, link) != resp.url:
                     print("Detected redirect from {} to {}".format(urljoin(url,link),resp.url))
-                visited_links.add(link) 
+                all_links.add(link) 
 
-    return links
+    return new_links
 
 
 def is_valid(url):
@@ -100,92 +100,19 @@ def is_valid(url):
     except TypeError:
         print("TypeError for ", parsed)
         raise
-
-# finds longest page based on number of words
-def longest_page():
-    numWords = 0
-    longestPage = None
+ 
+# def main():
+#     get_unique_urls = unique_urls()
+#     print("Unique pages: ", get_unique_urls)
     
-    # parse through pages
-    for link in visited_links:
-        soup = BeautifulSoup(link, 'html.parser')
-        text = soup.get_text()
-        pageCount = 0
-        # count how many words on page
-        for word in re.split('[^a-zA-Z0-9]', text):
-            word = word.lower()
-            pageCount += 1
-        if pageCount > numWords:
-            numWords = pageCount
-            longestPage = link
+#     get_longest_page = longest_page()
+#     print("Longest page: ", get_longest_page)
     
-    return longestPage
-
-
-# finds the 50 most common words
-def common_words():
-    stopwords_list = set(stopwords.words('english'))
-    word_count = Counter()
-
-    for link in visited_links:
-        soup = BeautifulSoup(link, 'html.parser')
-        text = soup.get_text()
-        words = re.findall(r'\b\w+\b', text.lower())
-        # if word is is not in stopwords list, add to word_count
-        word_count.update(word for word in words if word not in stopwords_list)
-        
-    return [word for word, count in word_count.most_common(50)]
-
-# find all unique urls
-def unique_urls():
-    # for each url, find the first like url part, and if its unique add it to count.
-    unique_urls = set()
-    for link in visited_links:
-        parsed = urlparse(link)
-        # remove fragment
-        url_without_fragment = urldefrag(link).link
-        unique_urls.add(url_without_fragment)
-
-    return len(unique_urls)
-
-# finds subdomains in ics.uci.edu domain
-def count_subdomains():
-    subdomains = {}
-    subdomain_count = []
-    for link in visited_links:
-        parsed_url = urlparse(link)
-        # split domain into different parts
-        domain_parts = parsed_url.netloc.split('.')
-        # check if domain is in ics.uci.edu
-        if parsed_url.netloc.endswith('.ics.uci.edu'):
-            # extract first part of domain
-            subdomain = domain_parts[-4]
-        # add to set
-        if subdomain not in subdomains:
-            subdomains[subdomain] = set()
-        
-        subdomains[subdomain].add(link)
-        
-        # loop through each subdomain and count how many there are
-        for subdomain, links in subdomain.items():
-            pages_count = len(links)
-            subdomain_count.append(('http://{}.ics.uci.edu'.format(subdomain), pages_count))
-            
-    return sorted(subdomain_count)
+#     get_common_words = common_words()
+#     print("50 most common words: ", get_common_words)
     
-    
-def main():
-    get_unique_urls = unique_urls()
-    print("Unique pages: ", get_unique_urls)
-    
-    get_longest_page = longest_page()
-    print("Longest page: ", get_longest_page)
-    
-    get_common_words = common_words()
-    print("50 most common words: ", get_common_words)
-    
-    get_subdomains = count_subdomains()
-    print("Subdomains found: ", get_subdomains)
+#     get_subdomains = count_subdomains()
+#     print("Subdomains found: ", get_subdomains)
     
     
 if __name__ == '__main__':
