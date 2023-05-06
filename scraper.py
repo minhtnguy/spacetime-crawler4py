@@ -1,7 +1,7 @@
 import re
 import pickle
 import nltk
-nltk.download('stopwords')
+# nltk.download('stopwords')
 
 from urllib.parse import urlparse
 from urllib.parse import urljoin
